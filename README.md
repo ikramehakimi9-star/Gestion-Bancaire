@@ -1,58 +1,184 @@
-﻿<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Gestion Bancaire – Application Laravel
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Mini-projet 2025/2026 – Université Mohammed V de Rabat, École Supérieure de Technologie de Salé.
 
-## About Laravel
+Application web de gestion des clients et de leurs comptes bancaires, avec virements sécurisés entre comptes.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+**Réalisé par :** NOM1 Prénom1 et NOM2 Prénom2 *(à remplacer)*
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Fonctionnalités
 
-## Learning Laravel
+### Gestion des clients
+- Ajouter, modifier, supprimer et afficher les clients
+- Liste triée par nom, avec pagination
+- Recherche par nom, prénom, CIN, email ou téléphone
+- La suppression d'un client supprime ses comptes (cascade)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### Gestion des comptes bancaires
+- Ajouter, modifier, supprimer et afficher les comptes
+- Un client peut avoir plusieurs comptes, un compte appartient à un seul client
+- RIB affiché par blocs de 4 chiffres, solde coloré selon sa valeur
+- Recherche par RIB (avec ou sans espaces) ou par titulaire
+- Fiche compte avec l'historique des virements émis et reçus
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Virements
+- Virement entre deux comptes distincts
+- Vérification du solde de l'émetteur et message d'erreur en cas de solde insuffisant
+- Mise à jour des deux soldes dans une **transaction SQL** (verrouillage `lockForUpdate`, rollback en cas d'erreur)
+- Aperçu du solde après virement, fenêtre de confirmation, protection contre le double clic
+- Numéro de référence pour chaque virement
+- Historique paginé des virements
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+### Tableau de bord
+- Vue d'ensemble : statistiques et comptes les mieux dotés
 
-## Agentic Development
+### Expérience utilisateur
+- Messages de succès précis, résumé des erreurs de validation en haut des formulaires
+- États vides explicites, titres de pages, indicateur de chargement
+- Retour à la liste filtrée (recherche et page) après modification ou suppression
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+---
+
+## Technologies
+
+| Élément | Outil |
+|---|---|
+| Framework | Laravel |
+| Langage | PHP 8.x |
+| Base de données | MySQL |
+| ORM | Eloquent |
+| Vues | Blade |
+| Interface | Bootstrap 5.3 |
+| Tests | PHPUnit (`php artisan test`) |
+
+---
+
+## Prérequis
+
+- PHP 8.2 ou supérieur (extensions `pdo_mysql`, `mbstring`, `openssl`)
+- Composer
+- MySQL / MariaDB (XAMPP, WAMP ou autre)
+
+---
+
+## Installation
 
 ```bash
-composer require laravel/boost --dev
+# 0. Récupérer le projet
+git clone https://github.com/ikramehakimi9-star/Gestion-Bancaire.git
+cd Gestion-Bancaire
 
-php artisan boost:install
+# 1. Installer les dépendances
+composer install
+
+# 2. Créer le fichier d'environnement
+copy .env.example .env          # Windows
+# cp .env.example .env          # Linux / macOS
+
+# 3. Générer la clé de l'application
+php artisan key:generate
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+4. Créer une base MySQL vide nommée `gestion_bancaire`, puis vérifier dans `.env` :
 
-## Contributing
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=gestion_bancaire
+DB_USERNAME=root
+DB_PASSWORD=
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
+# 5. Créer les tables et charger les données de démonstration
+php artisan migrate --seed
 
-## Code of Conduct
+# 6. Lancer le serveur
+php artisan serve
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Ouvrir ensuite **http://127.0.0.1:8000** dans le navigateur.
 
-## Security Vulnerabilities
+> **Alternative :** le dossier `database/` contient un export `gestion_bancaire.sql` qui peut être importé dans phpMyAdmin à la place de `migrate --seed`.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+---
 
-## License
+## Tests automatisés
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Créer une base de test vide nommée `gestion_bancaire_test`, puis :
+
+```bash
+php artisan test
+```
+
+La suite contient **37 tests** couvrant notamment :
+- les virements (succès, solde insuffisant, comptes identiques, validation, **rollback de la transaction**)
+- le CRUD des clients et des comptes
+- les relations Eloquent
+- la recherche, les états vides, les messages et le retour aux listes filtrées
+
+---
+
+## Architecture (MVC)
+
+```
+app/
+├── Http/
+│   ├── Controllers/
+│   │   ├── ClientWebController.php    # CRUD clients + recherche
+│   │   ├── CompteWebController.php    # CRUD comptes + recherche
+│   │   ├── VirementController.php     # virements (transaction SQL)
+│   │   └── DashboardController.php    # tableau de bord
+│   └── Requests/                      # validation (Form Requests)
+├── Models/
+│   ├── Client.php                     # hasMany(Compte)
+│   ├── Compte.php                     # belongsTo(Client), accesseurs de format
+│   └── Virement.php                   # emetteur / destinataire
+database/
+├── migrations/                        # tables clients, comptes, virements
+├── factories/                         # Factory (données de test)
+└── seeders/
+resources/views/
+├── layouts/app.blade.php              # gabarit commun
+├── clients/  comptes/  virements/     # vues Blade
+└── dashboard.blade.php
+routes/web.php                         # routes
+tests/Feature/                         # tests automatisés
+```
+
+### Modèle de données
+
+| Table | Champs principaux |
+|---|---|
+| `clients` | id, nom, prenom, cin, telephone, email, adresse |
+| `comptes` | id, rib, solde, client_id (clé étrangère) |
+| `virements` | id, compte_emetteur_id, compte_destinataire_id, montant, created_at |
+
+Relations : `Client hasMany Compte`, `Compte belongsTo Client`, `Compte hasMany Virement` (émis et reçus).
+
+---
+
+## Design patterns
+
+| Type | Pattern | Utilisation dans le projet |
+|---|---|---|
+| Création | Factory | `ClientFactory`, `CompteFactory` pour les tests et les seeders |
+| Création | Singleton | Conteneur de services de Laravel (services résolus une seule fois) |
+| Structure | MVC | Séparation modèles, vues Blade et contrôleurs |
+| Comportement | Observer | Événements Eloquent, utilisés dans le test du rollback |
+
+---
+
+## Sécurité
+
+- Jetons **CSRF** (`@csrf`) dans tous les formulaires
+- **Validation** des champs obligatoires et des types via les Form Requests, côté serveur
+- Protection contre l'**injection SQL** grâce à Eloquent et aux requêtes préparées
+- Échappement automatique des sorties Blade (protection XSS)
+- Transaction SQL avec verrouillage des comptes pour éviter les virements concurrents incohérents
+
+---
+
