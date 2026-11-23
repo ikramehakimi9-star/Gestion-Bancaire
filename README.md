@@ -4,7 +4,7 @@ Mini-projet 2025/2026 – Université Mohammed V de Rabat, École Supérieure de
 
 Application web de gestion des clients et de leurs comptes bancaires, avec virements sécurisés entre comptes.
 
-**Réalisé par :**Hakimi Ikram et Lakouismi Kawtar *(à remplacer)*
+Réalisé par : Hakimi Ikram et Lakouismi Kawtar
 
 ---
 
