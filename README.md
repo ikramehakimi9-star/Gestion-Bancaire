@@ -15,6 +15,7 @@ Réalisé par : Hakimi Ikram et Lakouismi Kawtar
 - Liste triée par nom, avec pagination
 - Recherche par nom, prénom, CIN, email ou téléphone
 - La suppression d'un client supprime ses comptes (cascade)
+- API JSON des clients (`/api/clients`) avec les mêmes règles de validation
 
 ### Gestion des comptes bancaires
 - Ajouter, modifier, supprimer et afficher les comptes
@@ -45,21 +46,22 @@ Réalisé par : Hakimi Ikram et Lakouismi Kawtar
 
 | Élément | Outil |
 |---|---|
-| Framework | Laravel |
-| Langage | PHP 8.x |
+| Framework | Laravel 13 |
+| Langage | PHP 8.3 ou supérieur |
 | Base de données | MySQL |
 | ORM | Eloquent |
 | Vues | Blade |
-| Interface | Bootstrap 5.3 |
+| Interface | Bootstrap 5.3 (chargé par CDN) |
 | Tests | PHPUnit (`php artisan test`) |
 
 ---
 
 ## Prérequis
 
-- PHP 8.2 ou supérieur (extensions `pdo_mysql`, `mbstring`, `openssl`)
+- PHP 8.3 ou supérieur (extensions `pdo_mysql`, `mbstring`, `openssl`, `fileinfo`, `curl`, `zip`)
 - Composer
 - MySQL / MariaDB (XAMPP, WAMP ou autre)
+- Connexion internet (Bootstrap est chargé par CDN : sans connexion, les pages s'affichent sans style)
 
 ---
 
@@ -81,7 +83,7 @@ copy .env.example .env          # Windows
 php artisan key:generate
 ```
 
-4. Créer une base MySQL vide nommée `gestion_bancaire`, puis vérifier dans `.env` :
+4. Créer une base MySQL vide nommée `gestion_bancaire`, puis **modifier** dans `.env` la configuration de la base (le fichier `.env.example` est réglé sur SQLite par défaut : remplacer ces lignes et retirer les `#` devant les lignes `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME` et `DB_PASSWORD`) :
 
 ```env
 DB_CONNECTION=mysql
@@ -114,11 +116,11 @@ Créer une base de test vide nommée `gestion_bancaire_test`, puis :
 php artisan test
 ```
 
-La suite contient **37 tests** couvrant notamment :
+La suite contient **31 tests** couvrant notamment :
 - les virements (succès, solde insuffisant, comptes identiques, validation, **rollback de la transaction**)
 - le CRUD des clients et des comptes
 - les relations Eloquent
-- la recherche, les états vides, les messages et le retour aux listes filtrées
+- la recherche et les états vides
 
 ---
 
@@ -128,6 +130,7 @@ La suite contient **37 tests** couvrant notamment :
 app/
 ├── Http/
 │   ├── Controllers/
+│   │   ├── ClientController.php       # API JSON des clients
 │   │   ├── ClientWebController.php    # CRUD clients + recherche
 │   │   ├── CompteWebController.php    # CRUD comptes + recherche
 │   │   ├── VirementController.php     # virements (transaction SQL)
@@ -137,6 +140,10 @@ app/
 │   ├── Client.php                     # hasMany(Compte)
 │   ├── Compte.php                     # belongsTo(Client), accesseurs de format
 │   └── Virement.php                   # emetteur / destinataire
+└── Providers/
+    └── AppServiceProvider.php         # pagination en style Bootstrap 5
+bootstrap/
+└── app.php                            # enregistre routes/web.php et routes/api.php
 database/
 ├── migrations/                        # tables clients, comptes, virements
 ├── factories/                         # Factory (données de test)
@@ -145,8 +152,12 @@ resources/views/
 ├── layouts/app.blade.php              # gabarit commun
 ├── clients/  comptes/  virements/     # vues Blade
 └── dashboard.blade.php
-routes/web.php                         # routes
-tests/Feature/                         # tests automatisés
+routes/
+├── web.php                            # routes web
+└── api.php                            # routes de l'API des clients
+tests/
+├── Feature/                           # tests automatisés
+└── Unit/
 ```
 
 ### Modèle de données
@@ -179,6 +190,3 @@ Relations : `Client hasMany Compte`, `Compte belongsTo Client`, `Compte hasMany 
 - Protection contre l'**injection SQL** grâce à Eloquent et aux requêtes préparées
 - Échappement automatique des sorties Blade (protection XSS)
 - Transaction SQL avec verrouillage des comptes pour éviter les virements concurrents incohérents
-
----
-
